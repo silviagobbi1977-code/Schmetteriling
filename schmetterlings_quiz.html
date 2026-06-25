@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Schmetterlings-Quiz</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:Arial, sans-serif;
+  background:url("schmetterling-bg.png") center/cover no-repeat fixed;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:24px;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(1.2px);
+}
+.quiz-box{
+  position:relative;
+  width:90%;
+  max-width:900px;
+  background:rgba(255,250,230,.91);
+  border-radius:28px;
+  padding:34px;
+  text-align:center;
+  box-shadow:0 18px 45px rgba(0,0,0,.32);
+  border:3px solid rgba(255,255,255,.8);
+}
+h1{
+  margin:0;
+  font-size:44px;
+  color:#274b12;
+}
+.subtitle{
+  margin:8px 0 22px;
+  font-size:24px;
+  color:#1f70b7;
+  font-weight:700;
+}
+.progress{
+  height:18px;
+  background:#eee6cf;
+  border-radius:20px;
+  overflow:hidden;
+  margin:18px auto 26px;
+  max-width:620px;
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.18);
+}
+.progress-bar{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#7aae36,#b7d957);
+  transition:.4s;
+}
+.question-card{
+  background:rgba(255,255,255,.88);
+  border:2px dashed #9abd67;
+  border-radius:22px;
+  padding:28px;
+}
+h2{color:#527c24;font-size:26px}
+.question-text{font-size:25px;line-height:1.4;color:#17220f}
+.answer-btn{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  width:88%;
+  margin:12px auto;
+  padding:14px 18px;
+  background:#fffdf5;
+  border:2px solid #eadfc6;
+  border-radius:15px;
+  font-size:21px;
+  cursor:pointer;
+  box-shadow:0 4px 10px rgba(0,0,0,.12);
+  transition:.2s;
+}
+.answer-btn:hover{transform:scale(1.015);background:#f4f9e6}
+.answer-btn::before{
+  content:attr(data-letter);
+  min-width:42px;
+  height:42px;
+  border-radius:50%;
+  background:#eef4c2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+}
+.correct{
+  background:#e7f8cf!important;
+  border-color:#72a736!important;
+  color:#2f6d10;
+}
+.wrong{
+  background:#ffe0d8!important;
+  border-color:#cc5b47!important;
+}
+#feedback{
+  margin-top:18px;
+  font-size:24px;
+  font-weight:700;
+  color:#426b1f;
+}
+#nextBtn,#restartBtn{
+  margin-top:24px;
+  padding:16px 42px;
+  border:none;
+  border-radius:24px;
+  background:linear-gradient(#ffdc62,#ffc52e);
+  font-size:24px;
+  font-weight:800;
+  cursor:pointer;
+  color:#4a2d00;
+  box-shadow:0 7px 0 #b88400,0 12px 18px rgba(0,0,0,.25);
+}
+#result{
+  font-size:25px;
+  background:rgba(255,255,255,.9);
+  border-radius:20px;
+  padding:24px;
+  margin-top:24px;
+}
+</style>
+</head>
+<body>
+<div class="quiz-box">
+  <h1>Schmetterlings-Quiz</h1>
+  <p class="subtitle">Von der Raupe zum Schmetterling</p>
+
+  <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+  <div id="quiz"></div>
+
+  <button id="nextBtn" onclick="nextQuestion()" style="display:none;">Weiter ➜</button>
+  <button id="restartBtn" onclick="restartQuiz()" style="display:none;">Noch einmal spielen</button>
+  <div id="result"></div>
+</div>
+
+<script>
+const questions = [
+{question:"Wie nennt man die vollständige Verwandlung vom Ei über Raupe und Puppe bis zum Schmetterling?",answers:["Bestäubung","Metamorphose","Häutung","Überwinterung"],correct:1},
+{question:"Warum frisst die Raupe nach dem Schlüpfen so viel?",answers:["Damit sie Vorräte und Kraft für die Verwandlung sammelt","Damit sie besser singen kann","Damit sie ihre Flügel färbt","Damit sie Nektar herstellen kann"],correct:0},
+{question:"Warum muss sich eine Raupe mehrmals häuten?",answers:["Weil ihre Haut nicht mitwächst","Weil sie ihre Farbe verliert","Weil sie dadurch fliegen lernt","Weil sie sonst keine Blätter findet"],correct:0},
+{question:"Was passiert in der Puppe?",answers:["Die Raupe schläft nur","Die Raupe verwandelt sich im Inneren zum Schmetterling","Die Raupe legt dort ihre Eier ab","Die Raupe sammelt Blütenstaub"],correct:1},
+{question:"Welche Reihenfolge ist richtig?",answers:["Ei – Puppe – Raupe – Schmetterling","Ei – Raupe – Puppe – Schmetterling","Raupe – Ei – Schmetterling – Puppe","Puppe – Ei – Raupe – Schmetterling"],correct:1},
+{question:"Wozu braucht der Schmetterling seinen Rüssel?",answers:["Zum Hören","Zum Saugen von Nektar","Zum Festhalten an Blättern","Zum Legen von Eiern"],correct:1},
+{question:"Warum sind Futterpflanzen für Raupen wichtig?",answers:["Viele Raupen fressen nur bestimmte Pflanzen","Schmetterlinge schlafen darin","Pflanzen färben die Flügel","Pflanzen machen die Raupen unsichtbar"],correct:0},
+{question:"Was ist eine wichtige Aufgabe erwachsener Schmetterlinge?",answers:["Steine zersetzen","Blüten besuchen und zur Bestäubung beitragen","Blätter zusammennähen","Regen machen"],correct:1}
+];
+
+let current=0, points=0;
+const letters=["A","B","C","D"];
+
+function showQuestion(){
+  const q=questions[current];
+  document.getElementById("progressBar").style.width=(current/questions.length*100)+"%";
+  document.getElementById("quiz").innerHTML=`
+    <div class="question-card">
+      <h2>Frage ${current+1} von ${questions.length}</h2>
+      <p class="question-text"><strong>${q.question}</strong></p>
+      ${q.answers.map((a,i)=>`<button class="answer-btn" data-letter="${letters[i]}" onclick="checkAnswer(${i})">${a}</button>`).join("")}
+      <div id="feedback"></div>
+    </div>`;
+  document.getElementById("nextBtn").style.display="none";
+  document.getElementById("result").innerHTML="";
+}
+
+function checkAnswer(choice){
+  const q=questions[current];
+  const buttons=document.querySelectorAll(".answer-btn");
+  buttons.forEach((b,i)=>{b.disabled=true;if(i===q.correct)b.classList.add("correct");});
+  if(choice===q.correct){
+    points++;
+    document.getElementById("feedback").innerHTML="✅ Richtig!";
+  }else{
+    buttons[choice].classList.add("wrong");
+    document.getElementById("feedback").innerHTML="❌ Nicht ganz. Die grüne Antwort ist richtig.";
+  }
+  document.getElementById("nextBtn").style.display="inline-block";
+}
+
+function nextQuestion(){
+  current++;
+  if(current<questions.length){showQuestion();}
+  else{
+    document.getElementById("progressBar").style.width="100%";
+    document.getElementById("quiz").innerHTML="";
+    document.getElementById("nextBtn").style.display="none";
+    document.getElementById("result").innerHTML=`<h2>Geschafft!</h2><p>Du hast <strong>${points}</strong> von <strong>${questions.length}</strong> Punkten erreicht.</p>`;
+    document.getElementById("restartBtn").style.display="inline-block";
+  }
+}
+function restartQuiz(){current=0;points=0;document.getElementById("restartBtn").style.display="none";showQuestion();}
+showQuestion();
+</script>
+</body>
+</html>
